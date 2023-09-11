@@ -6,7 +6,6 @@ import TaskList from './components/TaskList';
 import TaskFilter from './components/TaskFilter';
 import Task from './components/Task';
 
-// Import the CSS file
 import './styles.css';
 
 const App: React.FC = () => {
@@ -15,23 +14,27 @@ const App: React.FC = () => {
     return storedTasks;
   });
 
+  const [originalTasks, setOriginalTasks] = useState<Task[]>(tasks);
+
   const handleAddTask = (task: Task) => {
-    setTasks([...tasks, task]);
+    const updatedTasks = [...tasks, task];
+    setTasks(updatedTasks);
+    setOriginalTasks(updatedTasks); // Update original tasks
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
   };
 
   const handleDeleteTask = (taskId: number) => {
     const updatedTasks = tasks.filter((task) => task.id !== taskId);
     setTasks(updatedTasks);
+    setOriginalTasks(updatedTasks); // Update original tasks
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
   };
 
   const handleFilterTasks = (category: string) => {
     if (category === '') {
-      // Show all tasks
-      const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-      setTasks(storedTasks);
+      setTasks(originalTasks); // Restore original tasks when no category is selected
     } else {
-      // Filter tasks by category
-      const filteredTasks = tasks.filter((task) => task.category === category);
+      const filteredTasks = originalTasks.filter((task) => task.category === category);
       setTasks(filteredTasks);
     }
   };
@@ -46,7 +49,6 @@ const App: React.FC = () => {
       <h1>Task Management App</h1>
       <div className="form-container">
         <TaskForm onSubmit={handleAddTask} />
-        <hr></hr>
         <TaskFilter onSelectCategory={handleFilterTasks} />
       </div>
       <div className="task-list">
